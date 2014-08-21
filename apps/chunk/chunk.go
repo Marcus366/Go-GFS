@@ -6,8 +6,8 @@ import (
   "net/rpc"
   "time"
 
-  "github.com/sysu2012zzp/go-GFS/transport"
-  "github.com/sysu2012zzp/go-GFS/utils"
+  "github.com/sysu2012zzp/Go-GFS/transport"
+  "github.com/sysu2012zzp/Go-GFS/utils"
 )
 
 func sendHeartbeat(exitChan chan string) {
@@ -16,18 +16,16 @@ func sendHeartbeat(exitChan chan string) {
     log.Fatal("dialing:", err)
   }
   args := transport.HeartbeatArgs{ IP: utils.LocalIP() }
+  fmt.Println("IP:", args.IP.String())
   var reply transport.HeartbeatReply
   for {
-    client.Go("Heartbeat.KeepAlive", &args, &reply, nil)
-    /*
-    <-call.Done
-    if err = call.Error; err != nil {
+    err := client.Call("Heartbeat.KeepAlive", &args, &reply)
+    if err != nil {
+      fmt.Println("rpc call failed:", err)
       exitChan <- err.Error()
-      fmt.Println("call error")
       return
     }
-    */
-    time.Sleep(time.Second * 2)
+    time.Sleep(time.Second * 10)
   }
 }
 

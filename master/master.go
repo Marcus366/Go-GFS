@@ -25,8 +25,9 @@ func (m *Master) Main() {
     if err != nil {
       fmt.Println("[master] accept error: ", err)
     }
+    _ = conn
     //TODO: go Handle conn
-    go Handler(conn)
+    //go Handler(conn)
   }
 }
 

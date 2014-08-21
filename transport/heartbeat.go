@@ -13,12 +13,9 @@ type HeartbeatArgs struct {
 }
 
 type HeartbeatReply struct {
-  hey bool
 }
 
 func (h *Heartbeat) KeepAlive(args *HeartbeatArgs, reply *HeartbeatReply) error {
-  fmt.Println("Heartbeat")
-  reply.hey = true
   if args.IP != nil {
     fmt.Println("Heartbeat: ", args.IP.String())
   }
