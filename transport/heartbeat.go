@@ -2,10 +2,10 @@ package transport
 
 import (
   "net"
-  "fmt"
 )
 
-type Heartbeat struct {
+type HeartbeatCallback interface {
+  KeepAlive(args *HeartbeatArgs, reply *HeartbeatReply) error
 }
 
 type HeartbeatArgs struct {
@@ -15,9 +15,13 @@ type HeartbeatArgs struct {
 type HeartbeatReply struct {
 }
 
+type Heartbeat struct {
+  Callback HeartbeatCallback
+}
+
 func (h *Heartbeat) KeepAlive(args *HeartbeatArgs, reply *HeartbeatReply) error {
-  if args.IP != nil {
-    fmt.Println("Heartbeat: ", args.IP.String())
+  if h.Callback != nil {
+    return h.Callback.KeepAlive(args, reply)
   }
   return nil
 }

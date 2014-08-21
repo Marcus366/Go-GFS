@@ -3,7 +3,11 @@ package master
 import (
   "container/list"
   "fmt"
+  "log"
   "net"
+  "net/rpc"
+
+  "github.com/sysu2012zzp/Go-GFS/transport"
 )
 
 type Master struct {
@@ -16,20 +20,40 @@ func NewMaster() *Master {
 }
 
 func (m *Master) Main() {
-  listner, err := net.Listen("tcp", ":4399")
-  if err != nil {
-    fmt.Println("[master] listen error: ", err)
-  }
-  for {
-    conn, err := listner.Accept()
-    if err != nil {
-      fmt.Println("[master] accept error: ", err)
-    }
-    _ = conn
-    //TODO: go Handle conn
-    //go Handler(conn)
-  }
+  go m.openHeartbeatServer()
+  go m.openRegisterServer()
 }
 
-func Handler(conn net.Conn) {
+func (m *Master) openHeartbeatServer() {
+  r := rpc.NewServer()
+  r.Register(&transport.Heartbeat{m})
+
+  l, e := net.Listen("tcp", ":2345")
+  if e != nil {
+    log.Fatal("listen error: ", e)
+  }
+  go r.Accept(l)
+}
+
+func (m *Master) openRegisterServer() {
+  r := rpc.NewServer()
+  r.Register(&transport.Reg{m})
+
+  l, e := net.Listen("tcp", ":2346")
+  if e != nil {
+    log.Fatal("open register server fail:", e)
+  }
+  go r.Accept(l)
+}
+
+func (m *Master) KeepAlive(args *transport.HeartbeatArgs, reply *transport.HeartbeatReply) error {
+  if args.IP != nil {
+    fmt.Println("Heartbeat IP:", args.IP)
+  }
+  return nil
+}
+
+func (m *Master) Register(args *transport.RegArgs, reply *transport.RegReply) error {
+  fmt.Println("Register:", args.IP)
+  return nil
 }
