@@ -2,20 +2,15 @@ package main
 
 import (
   "fmt"
-  "log"
-  "net/rpc"
 
-  "github.com/sysu2012zzp/Go-GFS/transport"
+  "github.com/sysu2012zzp/Go-GFS/gfs"
 )
 
 func main() {
-  addr := fmt.Sprintf("%s:%v", "127.0.0.1", transport.OpenClosePort)
-  client, err := rpc.Dial("tcp", addr)
+  fd, err := gfs.Open("master.go")
   if err != nil {
-    log.Fatal("register fail:", err)
+    fmt.Println("Open fail: ", err)
+    return
   }
-  args := transport.OpenArgs{ "what", 1 }
-  var reply transport.OpenReply
-  err = client.Call("OpenClose.Open", &args, &reply)
-  fmt.Println("Open:", reply.FD)
+  fmt.Println("Open succeed: ", fd)
 }

@@ -4,47 +4,46 @@ import (
   "errors"
 )
 
-type OpenCloseCallback interface {
-  Open(fullFileName string, flag int64) (int32, error)
+type ManagerCallback interface {
+  Open(name string) (int32, error)
   Close(fd int32) error
 }
 
-type OpenClose struct {
-  Callback OpenCloseCallback
+type Manager struct {
+  Callback ManagerCallback
 }
 
 type OpenArgs struct {
-  FullFileName string
+  Name string
   Flag  int64
 }
 
 type OpenReply struct {
-  FD int32
+  Fd int32
 }
 
 type CloseArgs struct {
-  FD int32
+  Fd int32
 }
 
 type CloseReply struct {
 }
 
-func (oc *OpenClose) Open(args *OpenArgs, reply *OpenReply) error {
+func (oc *Manager) Open(args *OpenArgs, reply *OpenReply) error {
   if oc.Callback != nil {
-    fd, err := oc.Callback.Open(args.FullFileName, args.Flag)
-    reply.FD = fd
+    fd, err := oc.Callback.Open(args.Name)
+    reply.Fd = fd;
     return err
   } else {
-    return errors.New("OpenClose Callback nil")
+    return errors.New("Callback nil")
   }
 }
 
-func (oc *OpenClose) Close(args *CloseArgs, reply *CloseReply) error {
+func (oc *Manager) Close(args *CloseArgs, reply *CloseReply) error {
   if oc.Callback != nil {
-    err := oc.Callback.Close(args.FD)
+    err := oc.Callback.Close(args.Fd)
     return err
   } else {
-    return errors.New("OpenClose Callback nil")
+    return errors.New("Callback nil")
   }
-
 }

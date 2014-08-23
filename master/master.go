@@ -21,7 +21,7 @@ func NewMaster() *Master {
 func (m *Master) Main() {
   go m.openHeartbeatServer()
   go m.openRegisterServer()
-  go m.openOpenCloseServer()
+  go m.openManagerServer()
 }
 
 func (m *Master) openHeartbeatServer() {
@@ -48,9 +48,9 @@ func (m *Master) openRegisterServer() {
   go r.Accept(l)
 }
 
-func (m *Master) openOpenCloseServer() {
+func (m *Master) openManagerServer() {
   r := rpc.NewServer()
-  r.Register(&transport.OpenClose{m})
+  r.Register(&transport.Manager{m})
 
   addr := fmt.Sprintf(":%v", transport.OpenClosePort)
   l, e := net.Listen("tcp", addr)
@@ -74,8 +74,8 @@ func (m *Master) Register(args *transport.RegArgs, reply *transport.RegReply) er
   return nil
 }
 
-func (m *Master) Open(fullFileName string, flag int64) (int32, error) {
-  fmt.Println("Open: ", fullFileName, flag)
+func (m *Master) Open(name string) (int32, error) {
+  fmt.Println("Open: ", name)
   return 0, nil
 }
 
