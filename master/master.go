@@ -6,6 +6,7 @@ import (
   "log"
   "net"
   "net/rpc"
+  "strings"
 
   "github.com/sysu2012zzp/Go-GFS/transport"
 )
@@ -72,6 +73,14 @@ func (m *Master) Register(args *transport.RegArgs, reply *transport.RegReply) er
   chunk := &ChunkServer{ IP: args.IP }
   m.chunkServers.PushFront(chunk)
   return nil
+}
+
+func (m *Master) OpenFile(name string, flag int, perm transport.FileMode) (int32, error) {
+  if flag & O_CREATE != 0 {
+    slice := strings.Split(name, '/')
+  }
+  fmt.Println("OpenFile: ", name);
+  return 0, nil
 }
 
 func (m *Master) Open(name string) (int32, error) {
