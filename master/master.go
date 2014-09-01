@@ -20,9 +20,9 @@ func NewMaster() *Master {
 }
 
 func (m *Master) Main() {
-  go m.openHeartbeatServer()
-  go m.openRegisterServer()
-  go m.openManagerServer()
+  m.openHeartbeatServer()
+  m.openRegisterServer()
+  m.openManagerServer()
 }
 
 func (m *Master) openHeartbeatServer() {
