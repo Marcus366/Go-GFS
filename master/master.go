@@ -75,7 +75,7 @@ func (m *Master) Register(args *transport.RegArgs, reply *transport.RegReply) er
   return nil
 }
 
-func (m *Master) OpenFile(name string, flag int, perm transport.FileMode) (int32, error) {
+func (m *Master) OpenFile(name string, flag int, perm FileMode) (int32, error) {
   if flag & O_CREATE != 0 {
     slice := strings.Split(name, '/')
   }
