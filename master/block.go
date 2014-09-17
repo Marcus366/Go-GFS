@@ -1,4 +1,4 @@
 package master
 
-type block struct {
+type Block struct {
 }
