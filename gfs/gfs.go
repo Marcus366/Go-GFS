@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"net"
 	"net/rpc"
-
-	"github.com/sysu2012zzp/Go-GFS/transport"
 )
 
 var (
@@ -14,6 +12,6 @@ var (
 )
 
 func init() {
-	addr := fmt.Sprintf("%s:%v", MasterIP.String(), transport.OpenClosePort)
+	addr := fmt.Sprintf("%s:%v", MasterIP.String(), OpenClosePort)
 	Conn, _ = rpc.Dial("tcp", addr)
 }
