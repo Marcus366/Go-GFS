@@ -1,7 +1,7 @@
 package transport
 
 const (
-  HeartbeatPort = iota + 2345
-  RegisterPort
-  OpenClosePort
+	HeartbeatPort = iota + 2345
+	RegisterPort
+	OpenClosePort
 )

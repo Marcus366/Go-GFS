@@ -1,9 +1,9 @@
 package master
 
 import (
-  "net"
+	"net"
 )
 
 type ChunkServer struct {
-  IP net.IP
+	IP net.IP
 }

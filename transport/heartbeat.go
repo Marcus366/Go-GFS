@@ -1,27 +1,27 @@
 package transport
 
 import (
-  "net"
+	"net"
 )
 
 type HeartbeatCallback interface {
-  KeepAlive(args *HeartbeatArgs, reply *HeartbeatReply) error
+	KeepAlive(args *HeartbeatArgs, reply *HeartbeatReply) error
 }
 
 type HeartbeatArgs struct {
-  IP net.IP
+	IP net.IP
 }
 
 type HeartbeatReply struct {
 }
 
 type Heartbeat struct {
-  Callback HeartbeatCallback
+	Callback HeartbeatCallback
 }
 
 func (h *Heartbeat) KeepAlive(args *HeartbeatArgs, reply *HeartbeatReply) error {
-  if h.Callback != nil {
-    return h.Callback.KeepAlive(args, reply)
-  }
-  return nil
+	if h.Callback != nil {
+		return h.Callback.KeepAlive(args, reply)
+	}
+	return nil
 }

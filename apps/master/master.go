@@ -1,28 +1,27 @@
 package main
 
 import (
-  "fmt"
-  "flag"
+	"flag"
+	"fmt"
 
-  "github.com/sysu2012zzp/Go-GFS/master"
-  "github.com/sysu2012zzp/Go-GFS/utils"
+	"github.com/sysu2012zzp/Go-GFS/master"
+	"github.com/sysu2012zzp/Go-GFS/utils"
 )
 
 var (
-  version = flag.Bool("version", false, "get the version number")
+	version = flag.Bool("version", false, "get the version number")
 )
 
 func main() {
-  flag.Parse()
+	flag.Parse()
 
-  if *version {
-    fmt.Println("current version: ", utils.Version())
-    return
-  }
+	if *version {
+		fmt.Println("current version: ", utils.Version())
+		return
+	}
 
-  m := master.NewMaster()
-  m.Main()
+	m := master.NewMaster()
+	m.Main()
 
-  select {
-  }
+	select {}
 }

@@ -19,7 +19,8 @@ type Chunk struct {
 func NewChunk(ip net.IP) *Chunk {
 	return &Chunk{
 		LocalIP:  utils.LocalIP(),
-		MasterIP: ip}
+		MasterIP: ip
+	}
 }
 
 func (c *Chunk) Main(exitChan chan string) {
