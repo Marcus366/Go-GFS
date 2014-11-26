@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	fd, err := gfs.Open("master.go")
+	fd, err := gfs.OpenFile("master.go", gfs.O_CREATE | gfs.O_RDWR, 0666)
 	if err != nil {
 		fmt.Println("Open fail: ", err)
 		return

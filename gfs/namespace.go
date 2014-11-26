@@ -3,6 +3,7 @@ package gfs
 import (
 	"errors"
 	"strings"
+	"fmt"
 )
 
 type Directory struct {
@@ -31,17 +32,23 @@ func NewNamespace() *Namespace {
 	return &Namespace{NewDirectory()}
 }
 
-func (ns *Namespace) createFile(path string, flag int, perm FileMode) error {
+func (ns *Namespace) createFile(path string, flag int, perm FileMode) (*FileMsg, error) {
 	lastSlash := strings.LastIndex(path, "/")
 	if lastSlash != -1 {
 		slice := strings.Split(path, "/")
 		d := ns.rootdir.recursiveFindDirectory(string(path[0:lastSlash]))
 		if d == nil {
-			return errors.New("No Such File of Directory")
+			return nil, errors.New("No Such File of Directory")
 		}
 		filename := slice[len(slice)-1]
 		file := NewFileMsg(filename)
 		d.files[filename] = file
+		fmt.Println("create file: ", path)
+		return file, nil
+	} else {
+		file := NewFileMsg(path)
+		ns.rootdir.files[path] = file
+		fmt.Println("create file: ", path)
+		return file, nil
 	}
-	return nil
 }

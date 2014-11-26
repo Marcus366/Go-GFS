@@ -9,12 +9,14 @@ import (
 )
 
 type Master struct {
-	ChunkServers map[string]*ChunkServerMsg
+	chunkServers map[string]*ChunkServerMsg
+	nameSpace *Namespace
 }
 
 func NewMaster() *Master {
 	m := new(Master)
-	m.ChunkServers = make(map[string]*ChunkServerMsg)
+	m.chunkServers = make(map[string]*ChunkServerMsg)
+	m.nameSpace = NewNamespace()
 
 	return m
 }
@@ -52,19 +54,23 @@ func (m *Master) KeepAlive(args *HeartbeatArgs, reply *HeartbeatReply) error {
 	if args.IP != nil {
 		fmt.Println("Heartbeat IP:", args.IP)
 		ip := args.IP.String()
-		if m.ChunkServers[ip] == nil {
+		if m.chunkServers[ip] == nil {
 			cs := new(ChunkServerMsg)
 			cs.IP = args.IP
-			m.ChunkServers[ip] = cs
+			m.chunkServers[ip] = cs
 		}
 	}
 	return nil
 }
 
 func (m *Master) OpenFile(args *OpenArgs, reply *OpenReply) error {
-	//if flag&O_CREATE != 0 {
-		//slice := strings.Split(name, "/")
-	//}
+	if args.Flag&O_CREATE != 0 {
+		_, err := m.nameSpace.createFile(args.Name, args.Flag, args.Perm)
+		if err != nil {
+			fmt.Println("open file: ", args.Name, " fail.")
+			return err
+		}
+	}
 	fmt.Println("OpenFile: ", args.Name)
 	return nil
 }
