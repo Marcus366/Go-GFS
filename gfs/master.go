@@ -61,20 +61,20 @@ func (m *Master) KeepAlive(args *HeartbeatArgs, reply *HeartbeatReply) error {
 	return nil
 }
 
-func (m *Master) OpenFile(name string, flag int, perm FileMode) (int32, error) {
-	if flag&O_CREATE != 0 {
+func (m *Master) OpenFile(args *OpenArgs, reply *OpenReply) error {
+	//if flag&O_CREATE != 0 {
 		//slice := strings.Split(name, "/")
-	}
-	fmt.Println("OpenFile: ", name)
-	return 0, nil
+	//}
+	fmt.Println("OpenFile: ", args.Name)
+	return nil
 }
 
-func (m *Master) Open(name string) (int32, error) {
-	fmt.Println("Open: ", name)
-	return 0, nil
+func (m *Master) Open(args *OpenArgs, reply *OpenReply) error {
+	fmt.Println("Open: ", args.Name)
+	return nil
 }
 
-func (m *Master) Close(fd int32) error {
-	fmt.Println("Close: ", fd)
+func (m *Master) Close(args *CloseArgs, reply *CloseReply) error {
+	fmt.Println("Close: ", args.Fd)
 	return nil
 }

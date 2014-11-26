@@ -30,13 +30,13 @@ type File struct {
 func OpenFile(name string, flag int32, perm FileMode) (int32, error) {
 	args := OpenArgs{name, 0, 0}
 	var reply OpenReply
-	err := Conn.Call("Manager.OpenFile", &args, &reply)
+	err := Conn.Call("Master.OpenFile", &args, &reply)
 	return reply.Fd, err
 }
 
 func Open(name string) (int32, error) {
 	args := OpenArgs{name, 0, 0}
 	var reply OpenReply
-	err := Conn.Call("Manager.Open", &args, &reply)
+	err := Conn.Call("Master.Open", &args, &reply)
 	return reply.Fd, err
 }
