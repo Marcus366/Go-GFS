@@ -2,8 +2,8 @@ package gfs
 
 import (
 	"errors"
-	"strings"
 	"fmt"
+	"strings"
 )
 
 type Directory struct {
@@ -30,6 +30,27 @@ type Namespace struct {
 
 func NewNamespace() *Namespace {
 	return &Namespace{NewDirectory()}
+}
+
+func (ns *Namespace) findFile(path string) (*FileMsg, error) {
+	lastSlash := strings.LastIndex(path, "/")
+	filename := path
+	d := ns.rootdir
+	if lastSlash != -1 {
+		slice := strings.Split(path, "/")
+		d = ns.rootdir.recursiveFindDirectory(string(path[0:lastSlash]))
+		filename = string(path[lastSlash+1:])
+		if d == nil {
+			return nil, errors.New("No Such File or Directory")
+		}
+	}
+
+	msg := d.files[filename]
+	if msg == nil {
+		return nil, errors.New("No Such File")
+	}
+
+	return msg, nil
 }
 
 func (ns *Namespace) createFile(path string, flag int, perm FileMode) (*FileMsg, error) {

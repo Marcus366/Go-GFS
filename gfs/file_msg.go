@@ -6,14 +6,14 @@ import (
 
 type FileMsg struct {
 	name   string
-	blocks *list.List
+	chunks *list.List
 }
 
 func NewFileMsg(name string) *FileMsg {
 	f := new(FileMsg)
 
 	f.name = name
-	f.blocks = list.New()
+	f.chunks = list.New()
 
 	return f
 }

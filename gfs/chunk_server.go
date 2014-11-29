@@ -44,3 +44,7 @@ func (cs *ChunkServer) sendHeartbeat(exitChan chan string) {
 		}
 	}
 }
+
+func (cs *ChunkServer) Write(args *WriteTempArgs, reply *WriteReply) error {
+	return nil
+}

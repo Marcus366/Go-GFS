@@ -10,12 +10,14 @@ import (
 
 type Master struct {
 	chunkServers map[string]*ChunkServerMsg
-	nameSpace *Namespace
+	openFiles    []*FileMsg
+	nameSpace    *Namespace
 }
 
 func NewMaster() *Master {
 	m := new(Master)
 	m.chunkServers = make(map[string]*ChunkServerMsg)
+	m.openFile = make([]*FileMsg, 1024)
 	m.nameSpace = NewNamespace()
 
 	return m
@@ -77,10 +79,42 @@ func (m *Master) OpenFile(args *OpenArgs, reply *OpenReply) error {
 
 func (m *Master) Open(args *OpenArgs, reply *OpenReply) error {
 	fmt.Println("Open: ", args.Name)
+	filemsg, err := m.nameSpace.findFile(args.Name)
+	if err != nil {
+		reply.Err = err
+		return nil
+	}
+
+	for i, msg := range m.openFiles {
+		if msg == nil {
+			m.openFiles[i] = filemsg
+			reply.Fd = i
+			return nil
+		}
+	}
 	return nil
 }
 
 func (m *Master) Close(args *CloseArgs, reply *CloseReply) error {
 	fmt.Println("Close: ", args.Fd)
+	m.openFiles[args.Fd] = nil
+	return nil
+}
+
+func (m *Master) Write(args *WriteArgs, reply *WriteTempReply) error {
+	msg := m.openFiles[args.Fd]
+	if msg == nil {
+		reply.Err = errors.New("The file has not been opened")
+		return nil
+	}
+
+	if args.Off == -1 {
+		lastChunk := msg.chunks.Back().Value.(*ChunkMsg)
+		reply.Msg = *lastChunk.location
+		reply.Uuid = lastChunk.uuid
+		reply.Size = lastChunk.size
+		return nil
+	}
+
 	return nil
 }
