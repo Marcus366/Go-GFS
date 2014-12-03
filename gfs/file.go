@@ -1,5 +1,12 @@
 package gfs
 
+import (
+	"fmt"
+	"net/rpc"
+
+	"GoFS/common"
+)
+
 const (
 	O_RDONLY = 0x0
 	O_WRONLY = 0x1
@@ -25,18 +32,57 @@ const (
 )
 
 type File struct {
+	Fd int32
 }
 
-func OpenFile(name string, flag int, perm FileMode) (int32, error) {
-	args := OpenArgs{name, flag, perm}
-	var reply OpenReply
+func OpenFile(name string, flag int, perm FileMode) (*File, error) {
+	args := common.OpenArgs{name, flag, uint32(perm)}
+	var reply common.OpenReply
 	err := Conn.Call("Master.OpenFile", &args, &reply)
-	return reply.Fd, err
+	return &File{reply.Fd}, err
 }
 
-func Open(name string) (int32, error) {
-	args := OpenArgs{name, 0, 0}
-	var reply OpenReply
+func Open(name string) (*File, error) {
+	args := common.OpenArgs{name, 0, 0}
+	var reply common.OpenReply
 	err := Conn.Call("Master.Open", &args, &reply)
-	return reply.Fd, err
+	return &File{reply.Fd}, err
+}
+
+func (f *File) Close() error {
+	return nil
+}
+
+func (f *File) Read(b []byte) (int, error) {
+	return 0, nil
+}
+
+func (f *File) ReadAt(b []byte, off int64) (int, error) {
+	return 0, nil
+}
+
+func (f *File) Write(b []byte) (int, error) {
+	args := common.WriteArgs{f.Fd, -1}
+	var reply common.WriteTempReply
+	err := Conn.Call("Master.Write", &args, &reply)
+	if err != nil {
+		return 0, err
+	}
+
+	addr := fmt.Sprintf("%s:%v", reply.IP.String(), common.ManagerPort)
+	conn, err := rpc.Dial("tcp", addr)
+	if err != nil {
+		return 0, err
+	}
+
+	arg := &common.WriteTempArgs{reply.Uuid, b, -1}
+	var reply2 common.WriteReply
+	err = conn.Call("ChunkServer.Write", &arg, &reply2)
+	fmt.Println("Call Write to ChunkServer")
+
+	return reply2.Bytes, reply2.Err
+}
+
+func (f *File) WriteAt(b []byte, off int64) (int, error) {
+	return 0, nil
 }

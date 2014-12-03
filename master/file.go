@@ -1,16 +1,16 @@
-package gfs
+package master
 
 import (
 	"container/list"
 )
 
-type FileMsg struct {
+type File struct {
 	name   string
 	chunks *list.List
 }
 
-func NewFileMsg(name string) *FileMsg {
-	f := new(FileMsg)
+func NewFile(name string) *File {
+	f := new(File)
 
 	f.name = name
 	f.chunks = list.New()

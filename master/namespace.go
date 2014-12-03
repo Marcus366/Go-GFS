@@ -1,4 +1,4 @@
-package gfs
+package master
 
 import (
 	"errors"
@@ -8,11 +8,11 @@ import (
 
 type Directory struct {
 	subdir map[string]*Directory
-	files  map[string]*FileMsg
+	files  map[string]*File
 }
 
 func NewDirectory() *Directory {
-	return &Directory{make(map[string]*Directory), make(map[string]*FileMsg)}
+	return &Directory{make(map[string]*Directory), make(map[string]*File)}
 }
 
 func (d *Directory) recursiveFindDirectory(subpath string) *Directory {
@@ -32,12 +32,12 @@ func NewNamespace() *Namespace {
 	return &Namespace{NewDirectory()}
 }
 
-func (ns *Namespace) findFile(path string) (*FileMsg, error) {
+func (ns *Namespace) findFile(path string) (*File, error) {
 	lastSlash := strings.LastIndex(path, "/")
 	filename := path
 	d := ns.rootdir
 	if lastSlash != -1 {
-		slice := strings.Split(path, "/")
+		//slice := strings.Split(path, "/")
 		d = ns.rootdir.recursiveFindDirectory(string(path[0:lastSlash]))
 		filename = string(path[lastSlash+1:])
 		if d == nil {
@@ -53,7 +53,7 @@ func (ns *Namespace) findFile(path string) (*FileMsg, error) {
 	return msg, nil
 }
 
-func (ns *Namespace) createFile(path string, flag int, perm FileMode) (*FileMsg, error) {
+func (ns *Namespace) createFile(path string, flag int, perm uint32) (*File, error) {
 	lastSlash := strings.LastIndex(path, "/")
 	if lastSlash != -1 {
 		slice := strings.Split(path, "/")
@@ -62,12 +62,12 @@ func (ns *Namespace) createFile(path string, flag int, perm FileMode) (*FileMsg,
 			return nil, errors.New("No Such File of Directory")
 		}
 		filename := slice[len(slice)-1]
-		file := NewFileMsg(filename)
+		file := NewFile(filename)
 		d.files[filename] = file
 		fmt.Println("create file: ", path)
 		return file, nil
 	} else {
-		file := NewFileMsg(path)
+		file := NewFile(path)
 		ns.rootdir.files[path] = file
 		fmt.Println("create file: ", path)
 		return file, nil

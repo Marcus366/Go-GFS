@@ -1,7 +1,7 @@
-package gfs
+package common
 
 const (
 	HeartbeatPort = iota + 2345
 	RegisterPort
-	OpenClosePort
+	ManagerPort
 )

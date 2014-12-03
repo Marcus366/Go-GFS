@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net"
 
-	"Go-GFS/gfs"
+	"GoFS/chunk"
 )
 
 var (
@@ -22,7 +22,7 @@ func main() {
 	}
 
 	exitChan := make(chan string)
-	c := gfs.NewChunkServer(ip)
+	c := chunk.NewChunkServer(ip)
 	c.Main(exitChan)
 	<-exitChan
 	fmt.Println("exit")

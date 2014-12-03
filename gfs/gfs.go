@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net"
 	"net/rpc"
+
+	"GoFS/common"
 )
 
 var (
@@ -12,6 +14,6 @@ var (
 )
 
 func init() {
-	addr := fmt.Sprintf("%s:%v", MasterIP.String(), OpenClosePort)
+	addr := fmt.Sprintf("%s:%v", MasterIP.String(), common.ManagerPort)
 	Conn, _ = rpc.Dial("tcp", addr)
 }

@@ -1,13 +1,32 @@
-package gfs
+package common
+
+import (
+	"net"
+)
+
+const (
+	O_RDONLY = 0x0
+	O_WRONLY = 0x1
+	O_RDWR   = 0x2
+	O_APPEND = 0x400
+	O_CREATE = 0x40
+
+	/* the following flag maybe supported later
+	 * O_EXCL
+	 * O_SYNC
+	 * O_TRUNC
+	 */
+)
 
 type OpenArgs struct {
 	Name string
 	Flag int
-	Perm FileMode
+	Perm uint32
 }
 
 type OpenReply struct {
 	Fd int32
+	Err error
 }
 
 type CloseArgs struct {
@@ -23,15 +42,16 @@ type WriteArgs struct {
 }
 
 type WriteTempReply struct {
-	Msg ChunkServerMsg
-	Uuid int64
-	Size int64
+	IP   net.IP
+	Uuid uint64
+	Size uint64
 	Err error
 }
 
 type WriteTempArgs struct {
-	Uuid int64
+	Uuid uint64
 	Buf []byte
+	Off  int64
 }
 
 type WriteReply struct {

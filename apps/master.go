@@ -4,7 +4,8 @@ import (
 	"flag"
 	"fmt"
 
-	"Go-GFS/gfs"
+	"GoFS/master"
+	"GoFS/common"
 )
 
 var (
@@ -15,11 +16,11 @@ func main() {
 	flag.Parse()
 
 	if *version {
-		fmt.Println("current version: ", gfs.Version())
+		fmt.Println("current version: ", common.Version())
 		return
 	}
 
-	m := gfs.NewMaster()
+	m := master.NewMaster()
 	m.Main()
 
 	select {}

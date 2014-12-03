@@ -1,4 +1,4 @@
-package gfs
+package common
 
 import (
 	"fmt"

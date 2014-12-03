@@ -1,23 +1,25 @@
-package gfs
+package master
 
 import (
 	"fmt"
 	"log"
 	"net"
 	"net/rpc"
+	"errors"
 	//"strings"
+	"GoFS/common"
 )
 
 type Master struct {
-	chunkServers map[string]*ChunkServerMsg
-	openFiles    []*FileMsg
+	chunkServers map[string]*ChunkServer
+	openFiles    []*File
 	nameSpace    *Namespace
 }
 
 func NewMaster() *Master {
 	m := new(Master)
-	m.chunkServers = make(map[string]*ChunkServerMsg)
-	m.openFile = make([]*FileMsg, 1024)
+	m.chunkServers = make(map[string]*ChunkServer)
+	m.openFiles = make([]*File, 1024)
 	m.nameSpace = NewNamespace()
 
 	return m
@@ -32,7 +34,7 @@ func (m *Master) openHeartbeatServer() {
 	r := rpc.NewServer()
 	r.Register(m)
 
-	addr := fmt.Sprintf(":%v", HeartbeatPort)
+	addr := fmt.Sprintf(":%v", common.HeartbeatPort)
 	l, e := net.Listen("tcp", addr)
 	if e != nil {
 		log.Fatal("listen error: ", e)
@@ -44,20 +46,20 @@ func (m *Master) openManagerServer() {
 	r := rpc.NewServer()
 	r.Register(m)
 
-	addr := fmt.Sprintf(":%v", OpenClosePort)
+	addr := fmt.Sprintf(":%v", common.ManagerPort)
 	l, e := net.Listen("tcp", addr)
 	if e != nil {
-		log.Fatal("open openclose server fail:", e)
+		log.Fatal("open manager server fail:", e)
 	}
 	go r.Accept(l)
 }
 
-func (m *Master) KeepAlive(args *HeartbeatArgs, reply *HeartbeatReply) error {
+func (m *Master) KeepAlive(args *common.HeartbeatArgs, reply *common.HeartbeatReply) error {
 	if args.IP != nil {
 		fmt.Println("Heartbeat IP:", args.IP)
 		ip := args.IP.String()
 		if m.chunkServers[ip] == nil {
-			cs := new(ChunkServerMsg)
+			cs := new(ChunkServer)
 			cs.IP = args.IP
 			m.chunkServers[ip] = cs
 		}
@@ -65,8 +67,8 @@ func (m *Master) KeepAlive(args *HeartbeatArgs, reply *HeartbeatReply) error {
 	return nil
 }
 
-func (m *Master) OpenFile(args *OpenArgs, reply *OpenReply) error {
-	if args.Flag&O_CREATE != 0 {
+func (m *Master) OpenFile(args *common.OpenArgs, reply *common.OpenReply) error {
+	if args.Flag&common.O_CREATE != 0 {
 		_, err := m.nameSpace.createFile(args.Name, args.Flag, args.Perm)
 		if err != nil {
 			fmt.Println("open file: ", args.Name, " fail.")
@@ -77,7 +79,7 @@ func (m *Master) OpenFile(args *OpenArgs, reply *OpenReply) error {
 	return nil
 }
 
-func (m *Master) Open(args *OpenArgs, reply *OpenReply) error {
+func (m *Master) Open(args *common.OpenArgs, reply *common.OpenReply) error {
 	fmt.Println("Open: ", args.Name)
 	filemsg, err := m.nameSpace.findFile(args.Name)
 	if err != nil {
@@ -88,20 +90,20 @@ func (m *Master) Open(args *OpenArgs, reply *OpenReply) error {
 	for i, msg := range m.openFiles {
 		if msg == nil {
 			m.openFiles[i] = filemsg
-			reply.Fd = i
+			reply.Fd = int32(i)
 			return nil
 		}
 	}
 	return nil
 }
 
-func (m *Master) Close(args *CloseArgs, reply *CloseReply) error {
+func (m *Master) Close(args *common.CloseArgs, reply *common.CloseReply) error {
 	fmt.Println("Close: ", args.Fd)
 	m.openFiles[args.Fd] = nil
 	return nil
 }
 
-func (m *Master) Write(args *WriteArgs, reply *WriteTempReply) error {
+func (m *Master) Write(args *common.WriteArgs, reply *common.WriteTempReply) error {
 	msg := m.openFiles[args.Fd]
 	if msg == nil {
 		reply.Err = errors.New("The file has not been opened")
@@ -109,8 +111,8 @@ func (m *Master) Write(args *WriteArgs, reply *WriteTempReply) error {
 	}
 
 	if args.Off == -1 {
-		lastChunk := msg.chunks.Back().Value.(*ChunkMsg)
-		reply.Msg = *lastChunk.location
+		lastChunk := msg.chunks.Back().Value.(*Chunk)
+		reply.IP   = lastChunk.location.IP
 		reply.Uuid = lastChunk.uuid
 		reply.Size = lastChunk.size
 		return nil
