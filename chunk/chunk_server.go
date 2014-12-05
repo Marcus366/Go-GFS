@@ -33,7 +33,7 @@ func (cs *ChunkServer) Main(exitChan chan string) {
 	r.Register(cs)
 
 loop:
-	port := 1024 + rand.Intn(65536-1024)
+	port := 1024 + rand.Intn(65536 - 1024)
 	addr := fmt.Sprintf(":%v", port)
 	l, e := net.Listen("tcp", addr)
 	if e != nil {
@@ -69,13 +69,28 @@ func (cs *ChunkServer) sendHeartbeat(exitChan chan string) {
 
 func (cs *ChunkServer) Write(args *common.WriteTempArgs, reply *common.WriteReply) error {
 	fmt.Println("Write Uuid:", args.Uuid, "Content:", string(args.Buf))
-	name := strconv.Itoa(int(args.Uuid))
-	file, err := os.Open(name)
+	name := strconv.FormatUint(args.Uuid, 10)
+	file, err := os.OpenFile(name, os.O_WRONLY, 0777)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
 	reply.Bytes, err = file.Write(args.Buf)
+	if err != nil {
+		fmt.Println("Write failed:", err)
+	}
 	return err
+}
+
+func (cs *ChunkServer) NewChunk(args *common.NewChunkArgs, reply *common.NewChunkReply) error {
+	fmt.Println("NewChunk Uuid:", args.Uuid)
+	name := strconv.FormatUint(args.Uuid, 10)
+	file, err := os.Create(name)
+	if err != nil {
+		return err
+	}
+	file.Close()
+
+	return nil
 }

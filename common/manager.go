@@ -65,3 +65,10 @@ type ReadArgs struct {
 type ReadReply struct {
 	Buf []byte
 }
+
+type NewChunkArgs struct {
+	Uuid uint64
+}
+
+type NewChunkReply struct {
+}

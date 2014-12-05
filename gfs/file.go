@@ -3,7 +3,7 @@ package gfs
 import (
 	"fmt"
 	"net/rpc"
-	"runtime"
+	//"runtime"
 
 	"GoFS/common"
 )
@@ -63,7 +63,7 @@ func (f *File) ReadAt(b []byte, off int64) (int, error) {
 }
 
 func (f *File) Write(b []byte) (int, error) {
-	runtime.GOMAXPROCS(2)
+	//runtime.GOMAXPROCS(2)
 	args := common.WriteArgs{f.Fd, -1}
 	var reply common.WriteTempReply
 	fmt.Println("Write")
@@ -84,7 +84,9 @@ func (f *File) Write(b []byte) (int, error) {
 	arg := &common.WriteTempArgs{reply.Uuid, b, -1}
 	var reply2 common.WriteReply
 	err = conn.Call("ChunkServer.Write", &arg, &reply2)
-	fmt.Println("Call Write to ChunkServer")
+	if err != nil {
+		fmt.Println("Call Write to ChunkServer", err)
+	}
 
 	return reply2.Bytes, err
 }

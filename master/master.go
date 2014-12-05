@@ -76,19 +76,14 @@ func (m *Master) OpenFile(args *common.OpenArgs, reply *common.OpenReply) error 
 			return err
 		}
 
-		for _, cs := range m.chunkServers {
-				c := NewChunk(cs)
-				file.chunks.PushBack(c)
-				break
-		}
-
 		for i, msg := range m.openFiles {
 			if msg == nil {
 				m.openFiles[i] = file
 				reply.Fd = int32(i)
+				break
 			}
 		}
-		
+
 		return nil
 	}
 
@@ -127,6 +122,19 @@ func (m *Master) Write(args *common.WriteArgs, reply *common.WriteTempReply) err
 	}
 
 	if args.Off == -1 {
+		elem := file.chunks.Back()
+		if elem == nil {
+			cs := m.pickChunkServer()
+			if cs == nil {
+				return errors.New("No Available ChunkServer")
+			}
+			c := NewChunk(cs)
+			err := cs.CallNewChunk(c)
+			if err != nil {
+				return err
+			}
+			file.chunks.PushBack(c)
+		}
 		lastChunk := file.chunks.Back().Value.(*Chunk)
 		reply.IP = lastChunk.location.IP
 		reply.Port = lastChunk.location.Port
@@ -137,4 +145,12 @@ func (m *Master) Write(args *common.WriteArgs, reply *common.WriteTempReply) err
 	}
 
 	return nil
+}
+
+func (m *Master) pickChunkServer() *ChunkServer {
+	for _, cs := range m.chunkServers {
+		return cs;
+	}
+
+	return nil;
 }
