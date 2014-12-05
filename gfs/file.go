@@ -3,6 +3,7 @@ package gfs
 import (
 	"fmt"
 	"net/rpc"
+	"runtime"
 
 	"GoFS/common"
 )
@@ -62,14 +63,19 @@ func (f *File) ReadAt(b []byte, off int64) (int, error) {
 }
 
 func (f *File) Write(b []byte) (int, error) {
+	runtime.GOMAXPROCS(2)
 	args := common.WriteArgs{f.Fd, -1}
 	var reply common.WriteTempReply
+	fmt.Println("Write")
 	err := Conn.Call("Master.Write", &args, &reply)
 	if err != nil {
+		fmt.Println("Call Master Failed:", err)
 		return 0, err
 	}
 
-	addr := fmt.Sprintf("%s:%v", reply.IP.String(), common.ManagerPort)
+	fmt.Println("Call Master Return IP:", reply.IP.String(), "Port:", reply.Port)
+	addr := fmt.Sprintf("%s:%v", reply.IP.String(), reply.Port)
+	fmt.Println("Connect ChunkServer Addr:", addr)
 	conn, err := rpc.Dial("tcp", addr)
 	if err != nil {
 		return 0, err
@@ -80,7 +86,7 @@ func (f *File) Write(b []byte) (int, error) {
 	err = conn.Call("ChunkServer.Write", &arg, &reply2)
 	fmt.Println("Call Write to ChunkServer")
 
-	return reply2.Bytes, reply2.Err
+	return reply2.Bytes, err
 }
 
 func (f *File) WriteAt(b []byte, off int64) (int, error) {

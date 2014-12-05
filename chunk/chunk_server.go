@@ -1,11 +1,12 @@
 package chunk
 
 import (
-	"os"
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	"net/rpc"
+	"os"
 	"strconv"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 type ChunkServer struct {
 	LocalIP  net.IP
 	MasterIP net.IP
+	Port     int
 }
 
 func NewChunkServer(ip net.IP) *ChunkServer {
@@ -30,11 +32,15 @@ func (cs *ChunkServer) Main(exitChan chan string) {
 	r := rpc.NewServer()
 	r.Register(cs)
 
-	addr := fmt.Sprintf(":%v", common.ManagerPort)
+loop:
+	port := 1024 + rand.Intn(65536-1024)
+	addr := fmt.Sprintf(":%v", port)
 	l, e := net.Listen("tcp", addr)
 	if e != nil {
 		log.Fatal("open manager server fail:", e)
+		goto loop
 	}
+	cs.Port = port
 	go r.Accept(l)
 
 	go cs.sendHeartbeat(exitChan)
@@ -46,7 +52,7 @@ func (cs *ChunkServer) sendHeartbeat(exitChan chan string) {
 		log.Fatal("dialing:", err)
 	}
 
-	args := common.HeartbeatArgs{IP: cs.LocalIP}
+	args := common.HeartbeatArgs{IP: cs.LocalIP, Port: cs.Port}
 	var reply common.HeartbeatReply
 	fmt.Println("IP:", args.IP.String())
 
@@ -62,6 +68,7 @@ func (cs *ChunkServer) sendHeartbeat(exitChan chan string) {
 }
 
 func (cs *ChunkServer) Write(args *common.WriteTempArgs, reply *common.WriteReply) error {
+	fmt.Println("Write Uuid:", args.Uuid, "Content:", string(args.Buf))
 	name := strconv.Itoa(int(args.Uuid))
 	file, err := os.Open(name)
 	if err != nil {
@@ -69,6 +76,6 @@ func (cs *ChunkServer) Write(args *common.WriteTempArgs, reply *common.WriteRepl
 	}
 	defer file.Close()
 
-	reply.Bytes, reply.Err = file.Write(args.Buf)
-	return nil
+	reply.Bytes, err = file.Write(args.Buf)
+	return err
 }

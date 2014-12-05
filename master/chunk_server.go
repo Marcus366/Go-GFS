@@ -5,5 +5,6 @@ import (
 )
 
 type ChunkServer struct {
-	IP net.IP
+	IP   net.IP
+	Port int
 }

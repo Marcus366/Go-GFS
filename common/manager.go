@@ -26,7 +26,6 @@ type OpenArgs struct {
 
 type OpenReply struct {
 	Fd int32
-	Err error
 }
 
 type CloseArgs struct {
@@ -43,20 +42,19 @@ type WriteArgs struct {
 
 type WriteTempReply struct {
 	IP   net.IP
+	Port int
 	Uuid uint64
 	Size uint64
-	Err error
 }
 
 type WriteTempArgs struct {
 	Uuid uint64
-	Buf []byte
+	Buf  []byte
 	Off  int64
 }
 
 type WriteReply struct {
 	Bytes int
-	Err   error
 }
 
 type ReadArgs struct {
@@ -66,5 +64,4 @@ type ReadArgs struct {
 
 type ReadReply struct {
 	Buf []byte
-	Err error
 }

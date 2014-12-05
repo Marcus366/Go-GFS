@@ -14,5 +14,10 @@ func main() {
 	}
 	fmt.Println("Open succeed: ", fd.Fd)
 
-	fd.Write([]byte("what the fuck"))
+	str := "what the fuck"
+	_, err = fd.Write([]byte(str))
+	if err != nil {
+		fmt.Println("Write Error:", err)
+	}
+
 }

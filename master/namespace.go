@@ -2,7 +2,7 @@ package master
 
 import (
 	"errors"
-	"fmt"
+	//"fmt"
 	"strings"
 )
 
@@ -64,12 +64,10 @@ func (ns *Namespace) createFile(path string, flag int, perm uint32) (*File, erro
 		filename := slice[len(slice)-1]
 		file := NewFile(filename)
 		d.files[filename] = file
-		fmt.Println("create file: ", path)
 		return file, nil
 	} else {
 		file := NewFile(path)
 		ns.rootdir.files[path] = file
-		fmt.Println("create file: ", path)
 		return file, nil
 	}
 }

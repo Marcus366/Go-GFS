@@ -4,8 +4,8 @@ import (
 	"flag"
 	"fmt"
 
-	"GoFS/master"
 	"GoFS/common"
+	"GoFS/master"
 )
 
 var (

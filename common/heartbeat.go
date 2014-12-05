@@ -5,7 +5,8 @@ import (
 )
 
 type HeartbeatArgs struct {
-	IP net.IP
+	IP   net.IP
+	Port int
 }
 
 type HeartbeatReply struct {
